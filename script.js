@@ -2,8 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const sheet = document.getElementById('sheet');
     const typeSelect = document.getElementById('type-select');
-    const minNumberInput = document.getElementById('min-number');
-    const maxNumberInput = document.getElementById('max-number');
+    const addSubMinInput = document.getElementById('add-sub-min');
+    const addSubMaxInput = document.getElementById('add-sub-max');
+    const mulDivMinInput = document.getElementById('mul-div-min');
+    const mulDivMaxInput = document.getElementById('mul-div-max');
+    const excludedNumbersInput = document.getElementById('excluded-numbers');
     const problemCountInput = document.getElementById('problem-count');
     const columnCountInput = document.getElementById('column-count');
     const answerStyleSelect = document.getElementById('answer-style-select');
@@ -13,24 +16,64 @@ document.addEventListener('DOMContentLoaded', () => {
         sheet.innerHTML = '';
 
         const problemType = typeSelect.value;
-        let min = parseInt(minNumberInput.value, 10);
-        let max = parseInt(maxNumberInput.value, 10);
+
+        // 加减法范围
+        let addSubMin = parseInt(addSubMinInput.value, 10);
+        let addSubMax = parseInt(addSubMaxInput.value, 10);
+        if (addSubMin > addSubMax) {
+            [addSubMin, addSubMax] = [addSubMax, addSubMin];
+            addSubMinInput.value = addSubMin;
+            addSubMaxInput.value = addSubMax;
+        }
+        const addSubRange = addSubMax - addSubMin + 1;
+
+        // 乘除法范围
+        let mulDivMin = parseInt(mulDivMinInput.value, 10);
+        let mulDivMax = parseInt(mulDivMaxInput.value, 10);
+        if (mulDivMin > mulDivMax) {
+            [mulDivMin, mulDivMax] = [mulDivMax, mulDivMin];
+            mulDivMinInput.value = mulDivMin;
+            mulDivMaxInput.value = mulDivMax;
+        }
+        const mulDivRange = mulDivMax - mulDivMin + 1;
+
+        // 解析屏蔽数字
+        const excludedNumbers = new Set();
+        const excludedInput = excludedNumbersInput.value.trim();
+        if (excludedInput) {
+            excludedInput.split(',').forEach(s => {
+                const num = parseInt(s.trim(), 10);
+                if (!isNaN(num)) {
+                    excludedNumbers.add(num);
+                }
+            });
+        }
+
+        // 辅助函数：生成不在屏蔽列表中的随机数
+        function getRandomNumber(min, max, excluded) {
+            const maxAttempts = 100;
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                const num = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (!excluded.has(num)) {
+                    return num;
+                }
+            }
+            // 如果尝试多次都失败，返回范围内第一个不被屏蔽的数
+            for (let num = min; num <= max; num++) {
+                if (!excluded.has(num)) {
+                    return num;
+                }
+            }
+            // 如果所有数都被屏蔽，返回 min
+            return min;
+        }
+
         const problemCount = parseInt(problemCountInput.value, 10);
         const columnCount = parseInt(columnCountInput.value, 10);
         const answerStyle = answerStyleSelect.value;
-        
+
         // Dynamically set the grid layout
         sheet.style.gridTemplateColumns = `repeat(${columnCount}, 1fr)`;
-
-
-        // Ensure min is not greater than max
-        if (min > max) {
-            [min, max] = [max, min];
-            minNumberInput.value = min;
-            maxNumberInput.value = max;
-        }
-
-        const range = max - min + 1;
 
         // Generate problems
         for (let i = 0; i < problemCount; i++) {
@@ -51,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'divide':
                     operators.push('÷');
                     break;
+                case 'multiply_divide_mixed':
+                    operators.push('×', '÷');
+                    break;
                 case 'all_mixed':
                     operators.push('+', '-', '×', '÷');
                     break;
@@ -63,43 +109,32 @@ document.addEventListener('DOMContentLoaded', () => {
             operator = operators[Math.floor(Math.random() * operators.length)];
 
             if (operator === '÷') {
-                // 生成2位数除以1位数的除法题目
-                // 除数范围: 2-9 (一位数，避免除以1)
-                // 被除数范围: 10-99 (两位数)
-                // 确保能整除
+                // 除法：除数和商都在乘除法范围内，被除数不受限制
+                // 商在 [mulDivMin, mulDivMax] 范围内
+                // 除数在 [mulDivMin, mulDivMax] 范围内（但至少为1避免除以0）
+                // 被除数 = 除数 × 商（不限制范围）
 
-                let divisor = Math.floor(Math.random() * 8) + 2; // 2-9
+                let divisorMin = Math.max(mulDivMin, 1);
+                let quotient = getRandomNumber(mulDivMin, mulDivMax, excludedNumbers);
+                let divisor = getRandomNumber(divisorMin, mulDivMax, excludedNumbers);
 
-                // 计算商的范围，确保被除数是两位数 (10-99)
-                let minQuotient = Math.ceil(10 / divisor);
-                let maxQuotient = Math.floor(99 / divisor);
-
-                // 确保商至少为1
-                if (minQuotient < 1) minQuotient = 1;
-
-                let quotient = Math.floor(Math.random() * (maxQuotient - minQuotient + 1)) + minQuotient;
                 let dividend = divisor * quotient;
 
                 num1 = dividend;
                 num2 = divisor;
-                
+            } else if (operator === '×') {
+                // 乘法：乘数和被乘数都在乘除法范围内
+                num1 = getRandomNumber(mulDivMin, mulDivMax, excludedNumbers);
+                num2 = getRandomNumber(mulDivMin, mulDivMax, excludedNumbers);
             } else {
-                 num1 = Math.floor(Math.random() * range) + min;
-                 num2 = Math.floor(Math.random() * range) + min;
+                // 加法和减法：使用加减法范围
+                num1 = getRandomNumber(addSubMin, addSubMax, excludedNumbers);
+                num2 = getRandomNumber(addSubMin, addSubMax, excludedNumbers);
             }
 
 
             if (operator === '-' && num1 < num2) {
                 [num1, num2] = [num2, num1]; // Swap numbers for subtraction
-            }
-            
-            if (operator === '×' && (num1 > 10 || num2 > 10) && max > 10) {
-                 // Make multiplication less intimidating if range is large
-                 if (Math.random() > 0.5) {
-                    num1 = Math.floor(Math.random() * 10) + 1;
-                 } else {
-                    num2 = Math.floor(Math.random() * 10) + 1;
-                 }
             }
 
 
