@@ -1,0 +1,112 @@
+body {
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+}
+
+.toolbar {
+    margin: 20px;
+    position: sticky;
+    top: 0;
+    background: #f0f0f0;
+    padding: 10px;
+    z-index: 10;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    text-align: center;
+}
+
+#generate-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+}
+
+#generate-btn:hover {
+    background-color: #0056b3;
+}
+
+.page-container {
+    margin: 20px 0;
+}
+
+.sheet {
+    background-color: white;
+    width: 210mm;
+    min-height: 280mm;
+    padding: 20mm 10mm;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px 5px;
+}
+
+.problem {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.problem-number {
+    color: #888;
+    margin-right: 5px;
+}
+
+.problem-expression {
+    letter-spacing: 1px;
+}
+
+.answer-placeholder {
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-left: 5px;
+    vertical-align: middle;
+    text-align: center;
+    line-height: 20px;
+}
+
+.style-box {
+    border: 1px solid #888;
+}
+
+.style-underline {
+    border-bottom: 1px solid #888;
+}
+
+@media print {
+    @page {
+        margin: 5mm;
+    }
+
+    body {
+        background-color: white;
+        margin: 0;
+        padding: 0;
+    }
+
+    .toolbar {
+        display: none;
+    }
+
+    .page-container {
+        margin: 0;
+        padding: 0;
+    }
+
+    .sheet {
+        box-shadow: none;
+        width: 100%;
+        height: auto;
+        padding: 5mm;
+        margin: 0;
+    }
+}

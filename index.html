@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学数学练习题</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toolbar">
+        <button id="generate-btn">生成新题目</button>
+        <label for="type-select">题目类型:</label>
+        <select id="type-select">
+            <option value="add_subtract_mixed">加减混合</option>
+            <option value="add">纯加法</option>
+            <option value="subtract">纯减法</option>
+            <option value="multiply">纯乘法</option>
+            <option value="divide">纯除法</option>
+            <option value="all_mixed">四则混合</option>
+        </select>
+        <label for="min-number">数值范围:</label>
+        <input type="number" id="min-number" value="0" min="0">
+        ～
+        <input type="number" id="max-number" value="10" min="0">
+        <label for="problem-count">题目数量:</label>
+        <input type="number" id="problem-count" value="100" min="1">
+        <label for="column-count">列数:</label>
+        <input type="number" id="column-count" value="5" min="1">
+        <button id="toggle-answer-btn">显示/隐藏答案</button>
+        <label for="answer-style-select">答案样式:</label>
+        <select id="answer-style-select">
+            <option value="box">方框</option>
+            <option value="underline">下划线</option>
+            <option value="parentheses">括号</option>
+        </select>
+    </div>
+    <div class="page-container">
+        <div id="sheet" class="sheet">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
